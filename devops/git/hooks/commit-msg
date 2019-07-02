@@ -1,1 +1,23 @@
 #!/bin/bash
+
+t="$(mktemp)"
+cp -f "$1" "$t"
+typ="$(head -n 1 "$t" | grep -Eo '^[A-Za-z_\-]+(\([^)]+\))*!?:' | grep -o '^[A-Za-z_\-]*')"
+c=''
+case "$typ" in
+build)    c='🚧' ;;
+ci)       c='✅' ;;
+docs)     c='📚' ;;
+feat)     c='🌼' ;;
+fix)      c='🐍' ;;
+perf)     c='🚀' ;;
+refactor) c='🌀' ;;
+style)    c='📝' ;;
+test)     c='🔍' ;;
+esac
+echo '' >| "$1"
+if [[ -n "$c" ]]; then
+    echo -n "$c " >> "$1"
+fi
+cat "$t" >> "$1"
+rm -f "$t"
