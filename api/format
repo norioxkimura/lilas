@@ -1,0 +1,22 @@
+#!/bin/bash
+
+set -eu
+
+packages=($(./python-venv/bin/python -c 'import setuptools; print(" ".join(setuptools.find_packages()))'))
+if [[ $# == 0 ]]; then
+    target=($(git diff --name-only --relative HEAD "${packages[@]}"))
+elif [[ "$1" == '--all' ]]; then
+    target=("${packages[@]}")
+else
+    target=("$@")
+fi
+if [[ "${target-}" == '' ]]; then
+    exit
+fi
+
+echo '=== format: isort ==='
+./python-venv/bin/isort -rc "${target[@]}"
+
+echo '=== format: black ==='
+./python-venv/bin/black "${target[@]}"
+

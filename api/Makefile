@@ -14,6 +14,12 @@ install: _python-venv
 build: _python-venv
 	./python-venv/bin/python setup.py bdist_wheel
 
+format: _python-venv
+	./format $(O)
+
+lint: _python-venv
+	./lint $(O)
+
 _python-venv python-venv:
 	ln -sfT "$$(mktemp -d)" python-venv
 	python3 -m venv "$$(readlink -f python-venv)"
@@ -22,4 +28,4 @@ _python-venv python-venv:
 
 SHELL = /bin/bash
 
-.PHONY: help clean distclean install build
+.PHONY: help clean distclean install build format lint

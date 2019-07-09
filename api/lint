@@ -1,0 +1,28 @@
+#!/bin/bash
+
+set -eu
+
+packages=($(./python-venv/bin/python -c 'import setuptools; print(" ".join(setuptools.find_packages()))'))
+if [[ $# == 0 ]]; then
+    target=($(git diff --name-only --relative HEAD "${packages[@]}"))
+elif [[ "$1" == '--all' ]]; then
+    target=("${packages[@]}")
+else
+    target=("$@")
+fi
+if [[ "${target-}" == '' ]]; then
+    exit
+fi
+
+echo '=== lint: bandit ==='
+./python-venv/bin/bandit -r "${target[@]}"
+
+echo '=== lint: flake8 ==='
+./python-venv/bin/flake8 "${target[@]}"
+
+echo '=== lint: mypy ==='
+./python-venv/bin/mypy "${target[@]}"
+
+echo '=== lint: pylint ==='
+./python-venv/bin/pylint "${target[@]}"
+
