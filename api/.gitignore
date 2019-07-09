@@ -1,0 +1,8 @@
+/.mypy_cache/
+/_python-venv
+/build/
+/db.sqlite
+/dist/
+/pip-wheel-metadata/
+/python-venv
+/tibetiapi.egg-info/
