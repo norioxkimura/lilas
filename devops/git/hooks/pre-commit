@@ -1,1 +1,42 @@
 #!/bin/bash
+
+set -eu
+
+git_root_dir="$(git rev-parse --show-toplevel)"
+
+format-lint () {
+    local dir filter format lint
+    local a h x y z
+    dir="$1" filter="$2" format="$3" lint="$4"
+    pushd "$git_root_dir/$dir" > /dev/null
+    git diff-index --cached --diff-filter=AM --no-renames HEAD . | while read a; do
+        dest_mode="$(awk '{print $2}' <<< "$a")"
+        dest_hash="$(awk '{print $4}' <<< "$a")"
+        src_path="$(awk -F '\t' '{print $2}' <<< "$a")"
+        src_rel_path="${src_path#$dir/}"
+        if grep -qEe "$filter" <<< "$src_rel_path"; then
+            h="$(git cat-file -p "$dest_hash"                               \
+                 | bash -c "${format//\{\}/$src_rel_path}"                  \
+                 | git hash-object -w --stdin)"
+            if [[ "$h" != "$dest_hash" ]]; then
+                git update-index --cacheinfo "${dest_mode},${h},${src_path}"
+                x="$(sed 's/[^^]/[&]/g; s/\^/\\^/g' <<< "$dest_hash")"
+                y="$(sed 's/[^^]/[&]/g; s/\^/\\^/g' <<< "$h")"
+                z="$(sed 's/[&/\]/\\&/g' <<< "$src_path")"
+                git diff "$dest_hash" "$h" | sed -e "s/\($x\|$y\)/$z/g" | git apply -           \
+                    || echo 'git diff failed (ignored).' >&2
+                bash -c "${lint//\{\}/$src_rel_path}"
+            fi
+        fi
+    done
+    popd > /dev/null
+}
+
+format-lint api '^(tibetiapi)/'                                                                 \
+    './python-venv/bin/isort -rc - | ./python-venv/bin/black -'                                 \
+    '. ./python-venv/bin/activate && bandit -r "{}" && flake8 "{}" && mypy "{}" && pylint "{}"'
+
+format-lint web '^(pages|src)/.*\.[jt]sx?$'                                                     \
+    'npx prettier --stdin --stdin-filepath "{}"'                                                \
+    'npx eslint {}'
+
