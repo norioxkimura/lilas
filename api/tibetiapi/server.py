@@ -2,7 +2,7 @@ import graphene
 import responder
 
 
-api = responder.API()
+api = responder.API(cors=True, cors_params={"allow_origins": ["*"], "allow_methods": ["*"], "allow_headers": ["*"]})
 
 
 class Starship(graphene.ObjectType):
