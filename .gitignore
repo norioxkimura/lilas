@@ -1,0 +1,23 @@
+
+# general
+*~
+.DS_Store
+
+# direnv
+.envrc
+
+# VSCode
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# JetBrains
+.idea/**/contentModel.xml
+.idea/**/dictionaries
+.idea/**/shelf
+.idea/**/tasks.xml
+.idea/**/usage.statistics.xml
+.idea/**/workspace.xml
+
